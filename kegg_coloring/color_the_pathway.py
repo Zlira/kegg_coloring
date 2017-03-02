@@ -3,8 +3,8 @@
 import argparse
 from csv import reader
 
-from palette import Palette
-from pathway_scheme import PathwayImg
+from kegg_coloring.palette import Palette
+from kegg_coloring.pathway_scheme import PathwayImg
 
 
 parser = argparse.ArgumentParser()

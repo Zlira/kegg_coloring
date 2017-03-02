@@ -4,7 +4,7 @@ from warnings import warn
 import numpy as np
 from PIL import Image as Img
 
-from pathway_parse import parse_genes_list
+from kegg_coloring.pathway_parse import parse_genes_list
 
 
 def black_or_color(color, vals):

@@ -1,7 +1,7 @@
 from xml.etree import ElementTree
 
-from gene import Gene
-from gene import GeneRectangle
+from kegg_coloring.gene import Gene
+from kegg_coloring.gene import GeneRectangle
 
 
 def parse_gene_graphics(graphics):

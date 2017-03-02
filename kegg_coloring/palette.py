@@ -1,6 +1,6 @@
 import numpy as np
 
-from utils import round_towards_inf
+from kegg_coloring.utils import round_towards_inf
 
 
 class Palette:
