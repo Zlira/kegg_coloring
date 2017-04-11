@@ -7,13 +7,13 @@ class Palette:
 
     # colors from seaborn 'RdBu_r' palette
     colors = np.array([
-        [41, 113, 177],
+        [41, 113, 177],  # The blue end
         [107, 172, 208],
         [194, 221, 235],
         [247, 246, 246],
         [250, 204, 180],
         [228, 128, 101],
-        [185,  39,  50]
+        [185,  39,  50]  # The red end
     ])
 
     def __init__(self, vals):
@@ -24,6 +24,8 @@ class Palette:
         Return the length of scale unit based on range of vals.
         The middle color of scale is reserved for exactly 0 only.
         """
+        # need to filter vals so they don't include 'inf'
+        vals = vals[~np.isinf(vals)]
         furthest_val = np.abs([np.max(vals), np.min(vals)]).max()
         return float(furthest_val) / ((len(self.colors) - 1) / 2)
 

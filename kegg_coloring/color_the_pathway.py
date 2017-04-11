@@ -27,7 +27,7 @@ def color_gene_set_by_vals(pathway, gene_set):
     for gene_name, val in gene_set.items():
         color = palette.get_color(val)
         pathway.color_gene(gene_name, color)
-    return pathway.picture()
+    return pathway.picture_from_pixs()
 
 
 def parse_genes_file(genes_file):
@@ -38,7 +38,10 @@ def parse_genes_file(genes_file):
 
 
 def main(xml_file, img_file, genes_file, output_img):
-    pathway = PathwayImg(xml_file, img_file)
+    # TODO a bit misleading arguments' names.
+    pathway = PathwayImg(
+        xml_file_path=xml_file,
+        img_file_path=img_file)
     genes = parse_genes_file(genes_file)
     output = color_gene_set_by_vals(pathway, genes)
     output.save(output_img)

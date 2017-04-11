@@ -1,18 +1,22 @@
+from contextlib import contextmanager
 from functools import partial
 from warnings import warn
 
 import numpy as np
 from PIL import Image as Img
 
-from kegg_coloring.pathway_parse import parse_genes_list
+from kegg_coloring.kegg_client import download_img
+from kegg_coloring.pathway_kgml import PathwayKgml
 
 
 def black_or_color(color, vals):
     """
-    Given to collections of RGB values: new value and
+    Given two collections of RGB values: new value and
     current value, reutrn current value if it's black
     and new value otherwise.
     """
+    # TODO lable on gene box can actually be red or maybe some other
+    # color
     return vals if (vals == 0).all() else color
 
 
@@ -42,25 +46,67 @@ class PathwayImg:
     and gene list.
     """
 
-    def __init__(self, xml_file, img_file):
-        # Later I can download img_file from xml info
-        self.xml_file = xml_file
-        self.img_file = img_file
-        self.genes_ = None
-        self.pixs_ = None
+    def __init__(self, pathway_id):
+        self.id = pathway_id
+
+        self._kgml = None
+        self._genes = None
+        self._pixs = None
+        # an image file it can be a path string, or a filelike object
+        self._img = None
+
+    @property
+    def kgml(self):
+        if self._kgml is None:
+            self._kgml = PathwayKgml(pathway_id=self.id)
+        return self._kgml
+
+    @kgml.setter
+    def kgml(self, kgml_file):
+        """
+        kgml property is lazy so if it's set before the first
+        access it will not be downloaded from the network
+        """
+        self._kgml = PathwayKgml(kgml_file=kgml_file)
+
+    @property
+    def img(self):
+        # at the moment file is not saved after downlaod so
+        # if the stream was closed and it's need for something
+        # else it will be downloaded again
+        if self._img is None or (
+            # Ugh! not a nice check
+            not isinstance(self._img, str) and self._img.closed
+        ):
+            self.img = download_img(self.kgml.get_image_url())
+        return self._img
+
+    @img.setter
+    def img(self, img_file):
+        self._img = img_file
+
+    @contextmanager
+    def image(self):
+        # TODO a bit inconsistent naming
+        # TODO can and should this be reusable?
+        # Pillow's Image.open can handle both files and
+        # file paths
+        img = Img.open(self.img)
+        yield img
+        img.close()
 
     @property
     def genes(self):
-        if self.genes_ is None:
-            self.genes_ = parse_genes_list(self.xml_file)
-        return self.genes_
+        if self._genes is None:
+            self._genes = self.kgml.parse_genes_list()
+        return self._genes
 
     @property
     def pixs(self):
-        if self.pixs_ is None:
-            with Img.open(self.img_file) as pic:
-                self.pixs_ = np.array(pic.convert('RGB'))
-        return self.pixs_
+        if self._pixs is None:
+            with self.image() as image:
+                self._pixs = np.array(image.convert('RGB'))
+        return self._pixs
 
     def _find_gene_by_list_attr(self, attr_name, attr_val):
         """
@@ -101,12 +147,12 @@ class PathwayImg:
         """
         # TODO think about handling both names and kegg_ids
         for gene in self.find_gene_by_name(gene_name):
-            self.pixs_ = color_gene_section(
+            self._pixs = color_gene_section(
                 self.pixs, gene, color
             )
-        return self.pixs_
+        return self._pixs
 
-    def picture(self):
+    def picture_from_pixs(self):
         return Img.fromarray(self.pixs)
 
     # TODO add a method to save image into the file
