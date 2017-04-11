@@ -36,4 +36,8 @@ class Palette:
         """
         index = (len(self.colors) // 2 +
                  round_towards_inf(float(val) / self.unit))
-        return self.colors[int(index)]
+        try:
+            return self.colors[int(index)]
+        # the value might be infinity
+        except OverflowError:
+            return self.colors[0] if val < 0 else self.colors[-1]

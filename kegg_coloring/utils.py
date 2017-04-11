@@ -1,6 +1,7 @@
 from collections import Counter
 
 import numpy as np
+import pandas as pd
 
 
 def round_towards_inf(r):
@@ -28,3 +29,11 @@ def most_common_row(arr):
         Counter(tuple(row) for row in arr)
         .most_common(1)[0][0]
     )
+
+
+def dict_to_df(dct, key_col_name='key', val_col_name='val'):
+    """
+    Coverts python dictionary to a DataFrame with two columns
+    """
+    return pd.DataFrame(list(dct.items()),
+                        columns=[key_col_name, val_col_name])

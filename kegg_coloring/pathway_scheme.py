@@ -47,6 +47,7 @@ class PathwayImg:
     Represents a KEGG pathway with the associated picture
     and gene list.
     """
+    # TODO save both image and xml to temporary files
 
     def __init__(self, pathway_id):
         self.id = pathway_id
