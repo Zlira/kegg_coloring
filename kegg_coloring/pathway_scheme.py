@@ -7,17 +7,15 @@ from PIL import Image as Img
 
 from kegg_coloring.kegg_client import download_img
 from kegg_coloring.pathway_kgml import PathwayKgml
+from kegg_coloring.utils import most_common_row
 
 
-def black_or_color(color, vals):
+def new_pix_color(bg_color, new, old):
     """
-    Given two collections of RGB values: new value and
-    current value, reutrn current value if it's black
-    and new value otherwise.
+    Returns new color for background pixels and old for
+    all other.
     """
-    # TODO lable on gene box can actually be red or maybe some other
-    # color
-    return vals if (vals == 0).all() else color
+    return new if (old == bg_color).all() else old
 
 
 def color_gene_section(pixs_arr, gene, color,
@@ -31,9 +29,13 @@ def color_gene_section(pixs_arr, gene, color,
     x_slice, y_slice = gene.rectangle.get_section_coord_range(
         x_start, x_end, y_start, y_end
     )
+    section = pixs_arr[y_slice, x_slice]
+    # we want to change only background color. at this point
+    # the color of a background is determined as the most common one.
+    bg_color = most_common_row(section.reshape((1, -1, 3))[0])
 
     pixs_arr[y_slice, x_slice] = np.apply_along_axis(
-        partial(black_or_color, color),
+        partial(new_pix_color, bg_color, color),
         axis=-1,
         arr=pixs_arr[y_slice, x_slice]
     )

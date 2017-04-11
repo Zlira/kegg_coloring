@@ -18,6 +18,7 @@ class GeneRectangle:
     """
     Represents a rectangle on the image where the gene is.
     """
+    # TODO should the rectangle be able to draw itself?
 
     def __init__(self, x, y, width, height):
         # ignore fgcolor and bgcolor for now
@@ -54,7 +55,7 @@ class Gene:
 
     def __repr__(self):
         return 'Gene {} at position ({}, {})'.format(
-            self.names[0], *self.center_coordinates()
+            self.names, *self.center_coordinates()
         )
 
     def center_coordinates(self):
