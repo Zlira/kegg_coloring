@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 def read_david_res(file_path):
@@ -45,3 +46,15 @@ class DavidRes(pd.DataFrame):
             .query(f'term == "{pathway_name}"')
             .iloc[0]['kegg_id']
         )
+
+    def plot_expected_vs_observed(self, category='KEGG_PATHWAY', n=10):
+        df = self.copy()
+        df.set_index(self.list_pathways()['term'], inplace=True)
+        df = df.sort_values('PValue', ascending=False)
+        df['Expected Count'] = (
+            df['Pop Hits'] / df['Pop Total'] * df['List Total']
+        )
+        (df[-n:]['Count']
+         .plot.barh(color='#D9A1AB', figsize=(12, n / 2), fontsize=14))
+        df[-n:]['Expected Count'].plot.barh(color='#774576')
+        plt.ylabel('')
